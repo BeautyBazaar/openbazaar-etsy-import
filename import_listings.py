@@ -318,7 +318,7 @@ with open('listings.csv', 'rU') as f:
             'shipping_international': '',
             'category': '',
             'condition': '',
-            'sku': '',
+            'sku': listing['SKU'],
             'free_shipping': 'false',
             'ships_to': ['all'],
             'shipping_origin': SHIPPING_ORIGIN
