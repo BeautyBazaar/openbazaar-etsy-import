@@ -14,7 +14,7 @@ currency_codes = ("AED", "ARS", "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK",
                   "INR", "JPY", "KRW", "MAD", "MXN", "NOK", "NZD", "PHP", "PLN", "RUB", "SEK", "SGD", "THB", "TRY",
                   "USD", "ZAR")
 
-SHIPPING_ORIGIN = "ALL"
+SHIPPING_ORIGIN = "UNITED_STATES"
 # For shipping origin please choose a country code string for where you want listings to
 # come from.
 #
@@ -286,28 +286,31 @@ with open('listings.csv', 'rU') as f:
         print listing
 
         # Download images from listing
-        image = urllib.urlopen(listing['IMAGE1'])
-        image_64 = base64.encodestring(image.read())
+	## Will need to split 'Pictures' field as it may contain multiples separated by a comma
+	## Those who have local paths to the images in their SixBit install will not be able to include images
+        #image = urllib.urlopen(listing['Pictures'])
+        #image_64 = base64.encodestring(image.read())
 
         # Upload to server and get hash
-        payload = {
-            'image': image_64
-        }
-        image_hashes = s.post('%s/upload_image' % api, data=payload)
-        image_hashes = image_hashes.json()
+        #payload = {
+        #    'image': image_64
+        #}
+        #image_hashes = s.post('%s/upload_image' % api, data=payload)
+        #image_hashes = image_hashes.json()
 
         # Separate comma-separated tags
-        tags = [x.strip() for x in listing['TAGS'].split(',')]
+	## Need to look into where tags/keywords are stored in exported csv
+        #tags = [x.strip() for x in listing['TAGS'].split(',')]
 
         # Insert listing into OB
         payload = {
-            'keywords': tags,
+        #    'keywords': tags,
             'title': listing['Title'],
             'description': listing['eBay Description'],
             'currency_code': 'USD',
             'price': listing['Buy It Now Price'],
             'process_time': '24 hours',
-            'images': image_hashes['image_hashes'],
+        #   'images': image_hashes['image_hashes'],
             'expiration_date': '',
             'metadata_category': 'physical good',
             'nsfw': 'false',
