@@ -6,8 +6,8 @@ import requests
 import urllib
 
 api = 'http://localhost:18469/api/v1'
-OB_USERNAME = "admin"
-OB_PASSWORD = "AoG4hKWwDLruvUce7o3MxzWB0STw0MbvaWN6"
+OB_USERNAME = "username"
+OB_PASSWORD = "password"
 
 
 currency_codes = ("AED", "ARS", "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", "HUF", "ILS",
