@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 
 import base64
 import csv
@@ -286,31 +286,31 @@ with open('listings.csv', 'rU') as f:
         print listing
 
         # Download images from listing
-	## Will need to split 'Pictures' field as it may contain multiples separated by a comma
-	## Those who have local paths to the images in their SixBit install will not be able to include images
-        #image = urllib.urlopen(listing['Pictures'])
-        #image_64 = base64.encodestring(image.read())
+        ## Will need to split 'Pictures' field as it may contain multiples separated by a comma, I believe
+        ## Those who have local paths to the images in their SixBit install will not be able to include images
+        image = urllib.urlopen(listing['Pictures Generated URL'])
+        image_64 = base64.encodestring(image.read())
 
         # Upload to server and get hash
-        #payload = {
-        #    'image': image_64
-        #}
-        #image_hashes = s.post('%s/upload_image' % api, data=payload)
-        #image_hashes = image_hashes.json()
+        payload = {
+            'image': image_64
+        }
+        image_hashes = s.post('%s/upload_image' % api, data=payload)
+        image_hashes = image_hashes.json()
 
         # Separate comma-separated tags
-	## Need to look into where tags/keywords are stored in exported csv
+        ## Need to look into where tags/keywords are stored in exported csv
         #tags = [x.strip() for x in listing['TAGS'].split(',')]
 
         # Insert listing into OB
         payload = {
-        #    'keywords': tags,
-            'title': listing['Title'],
+            'keywords': 'cosmetics',
+            'title': listing['Title'] + ' ' + listing['Variation1'],
             'description': listing['eBay Description'],
             'currency_code': 'USD',
-            'price': listing['Buy It Now Price'],
+            'price': listing['Fixed Price'],
             'process_time': '24 hours',
-        #   'images': image_hashes['image_hashes'],
+            'images': image_hashes['image_hashes'],
             'expiration_date': '',
             'metadata_category': 'physical good',
             'nsfw': 'false',
@@ -323,7 +323,7 @@ with open('listings.csv', 'rU') as f:
             'condition': 'New',
             'sku': listing['SKU'],
             'free_shipping': 'true',
-            'ships_to': ['UNITED_STATES'],
+            'ships_to': 'UNITED_STATES',
             'shipping_origin': SHIPPING_ORIGIN
         }
         posted = s.post('%s/contracts' % api, data=payload)
