@@ -305,6 +305,9 @@ with open('listings.csv', 'rU') as f:
 	# Strip some eBay html formatting from description html code
 	description = listing['eBay Description']
 	description = description.replace('[/n]', '')
+	description = description.replace('[[Shade]]', listing['Variation1'])
+	description = description.replace('[[MyProductLine]]', listing['Title'])
+	
 
         # Insert listing into OB
         payload = {
