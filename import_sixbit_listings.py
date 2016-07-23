@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 
 import base64
 import csv
@@ -8,6 +8,7 @@ import urllib
 api = 'http://localhost:18469/api/v1'
 OB_USERNAME = "username"
 OB_PASSWORD = "password"
+imagehost = "http://images.domainname.com"
 
 
 currency_codes = ("AED", "ARS", "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", "HUF", "ILS",
@@ -285,32 +286,49 @@ with open('listings.csv', 'rU') as f:
     for listing in reader:
         print listing
 
+	# Set URL of image based on SKU
+	imageurl = imagehost + '/' + listing['SKU'] + '.jpg'
+	print imageurl
+
         # Download images from listing
-	## Will need to split 'Pictures' field as it may contain multiples separated by a comma
-	## Those who have local paths to the images in their SixBit install will not be able to include images
-        #image = urllib.urlopen(listing['Pictures'])
-        #image_64 = base64.encodestring(image.read())
+        ## Will need to split 'Pictures' field as it may contain multiples separated by a comma, I believe
+        ## Those who have local paths to the images in their SixBit install will not be able to include images
+	image = urllib.urlopen(imageurl)
+        image_64 = base64.encodestring(image.read())
 
         # Upload to server and get hash
-        #payload = {
-        #    'image': image_64
-        #}
-        #image_hashes = s.post('%s/upload_image' % api, data=payload)
-        #image_hashes = image_hashes.json()
+        payload = {
+            'image': image_64
+        }
+        image_hashes = s.post('%s/upload_image' % api, data=payload)
+	image_hashes = image_hashes.json()
 
         # Separate comma-separated tags
-	## Need to look into where tags/keywords are stored in exported csv
+        ## Need to look into where tags/keywords are stored in exported csv
         #tags = [x.strip() for x in listing['TAGS'].split(',')]
+
+	# Strip some common unnecessary eBay Title keywords
+	title = listing['Title']
+	title = title.replace('U Pick Choice', '')	
+	title = title.replace('U Pick', '')
+
+	# Strip some eBay html formatting from description html code
+	description = listing['eBay Description']
+	description = description.replace('[/n]', '')
+	description = description.replace('[[Shade]]', listing['Variation1'])
+	description = description.replace('[[My Shade]]', listing['Variation1'])
+	description = description.replace('[[MyProductLine]]', title)
+	
 
         # Insert listing into OB
         payload = {
-        #    'keywords': tags,
-            'title': listing['Title'],
-            'description': listing['eBay Description'],
+            'keywords': 'cosmetics',
+            'title': title + ' ' + listing['Variation1'], #I added Variation1 to the title because my listings are variation listings
+            'description': description,
             'currency_code': 'USD',
-            'price': listing['Buy It Now Price'],
+            'price': listing['Fixed Price'],
             'process_time': '24 hours',
-        #   'images': image_hashes['image_hashes'],
+            'images': image_hashes['image_hashes'],
             'expiration_date': '',
             'metadata_category': 'physical good',
             'nsfw': 'false',
@@ -319,11 +337,11 @@ with open('listings.csv', 'rU') as f:
             'shipping_currency_code': 'USD',
             'shipping_domestic': 'true',
             'shipping_international': 'false',
-            'category': '',
+            'category': listing['eBay Store Category2Name'],
             'condition': 'New',
             'sku': listing['SKU'],
             'free_shipping': 'true',
-            'ships_to': ['UNITED_STATES'],
+            'ships_to': 'UNITED_STATES',
             'shipping_origin': SHIPPING_ORIGIN
         }
         posted = s.post('%s/contracts' % api, data=payload)
