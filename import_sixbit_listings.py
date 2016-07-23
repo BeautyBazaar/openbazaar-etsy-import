@@ -296,7 +296,7 @@ with open('listings.csv', 'rU') as f:
             'image': image_64
         }
         image_hashes = s.post('%s/upload_image' % api, data=payload)
-        image_hashes = image_hashes.json()
+	image_hashes = image_hashes.json()
 
         # Separate comma-separated tags
         ## Need to look into where tags/keywords are stored in exported csv
@@ -319,7 +319,7 @@ with open('listings.csv', 'rU') as f:
             'shipping_currency_code': 'USD',
             'shipping_domestic': 'true',
             'shipping_international': 'false',
-            'category': '',
+            'category': listing['eBay Store Category2Name'],
             'condition': 'New',
             'sku': listing['SKU'],
             'free_shipping': 'true',
