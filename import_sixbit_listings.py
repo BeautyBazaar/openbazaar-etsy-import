@@ -6,8 +6,8 @@ import requests
 import urllib
 
 api = 'http://localhost:18469/api/v1'
-OB_USERNAME = "username"
-OB_PASSWORD = "password"
+OB_USERNAME = "admin"
+OB_PASSWORD = "AoG4hKWwDLruvUce7o3MxzWB0STw0MbvaWN6"
 
 
 currency_codes = ("AED", "ARS", "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", "HUF", "ILS",
@@ -288,7 +288,7 @@ with open('listings.csv', 'rU') as f:
         # Download images from listing
         ## Will need to split 'Pictures' field as it may contain multiples separated by a comma, I believe
         ## Those who have local paths to the images in their SixBit install will not be able to include images
-        image = urllib.urlopen(listing['Pictures Generated URL'])
+	image = urllib.urlopen(listing['Pictures Generated URL'])
         image_64 = base64.encodestring(image.read())
 
         # Upload to server and get hash
@@ -302,11 +302,15 @@ with open('listings.csv', 'rU') as f:
         ## Need to look into where tags/keywords are stored in exported csv
         #tags = [x.strip() for x in listing['TAGS'].split(',')]
 
+	# Strip some eBay html formatting from description html code
+	description = listing['eBay Description']
+	description = description.replace('[/n]', '')
+
         # Insert listing into OB
         payload = {
             'keywords': 'cosmetics',
             'title': listing['Title'] + ' ' + listing['Variation1'],
-            'description': listing['eBay Description'],
+            'description': description,
             'currency_code': 'USD',
             'price': listing['Fixed Price'],
             'process_time': '24 hours',
