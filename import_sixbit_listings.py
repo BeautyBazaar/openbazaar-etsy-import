@@ -8,7 +8,7 @@ import urllib
 api = 'http://localhost:18469/api/v1'
 OB_USERNAME = "username"
 OB_PASSWORD = "password"
-imagehost = "http://images.domainname.com"
+imagehost = "http://imagehost.url.com/notrailingslash"
 
 
 currency_codes = ("AED", "ARS", "AUD", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "EUR", "GBP", "HKD", "HUF", "ILS",
@@ -284,11 +284,12 @@ with open('listings.csv', 'rU') as f:
     print login.json()
 
     for listing in reader:
-        print listing
+        #print listing
 
-	# Set URL of image based on SKU
+	# Set URL of image based on SKU and imagehost url
 	imageurl = imagehost + '/' + listing['SKU'] + '.jpg'
-	print imageurl
+	shadeimageurl = imagehost + '/' + listing['SKU'] + '-shade.jpg'
+	#print imageurl
 
         # Download images from listing
         ## Will need to split 'Pictures' field as it may contain multiples separated by a comma, I believe
@@ -303,9 +304,17 @@ with open('listings.csv', 'rU') as f:
         image_hashes = s.post('%s/upload_image' % api, data=payload)
 	image_hashes = image_hashes.json()
 
+        # Using tags from "eBay Title" heading which had keywords that were appended to sellers ebay listing title
+	tags = listing['eBay Title']
+	tags = tags.replace('[[Shade]] ', '')
+	tags = tags.replace('[[MyShade]] ', '')
+	tags = tags.replace('[[My Shade]] ', '')
+	tags = tags.replace('[[MyProductLine]] ', '')
+	tags = tags.replace(' ', ', ')
+
         # Separate comma-separated tags
-        ## Need to look into where tags/keywords are stored in exported csv
-        #tags = [x.strip() for x in listing['TAGS'].split(',')]
+	tags = [x.strip() for x in tags.split(',')]
+
 
 	# Strip some common unnecessary eBay Title keywords
 	title = listing['Title']
@@ -315,14 +324,19 @@ with open('listings.csv', 'rU') as f:
 	# Strip some eBay html formatting from description html code
 	description = listing['eBay Description']
 	description = description.replace('[/n]', '')
-	description = description.replace('[[Shade]]', listing['Variation1'])
-	description = description.replace('[[My Shade]]', listing['Variation1'])
+	# Replace Sellers's eBay variables with live data
 	description = description.replace('[[MyProductLine]]', title)
+
+	# Add the *-shade.jpg to the description
+	#print shadeimageurl
+	description = description.replace('[[Shade]]', listing['Variation1'] + "<p><IMG SRC=\"" + shadeimageurl + "\">")
+	description = description.replace('Your Choice', listing['Variation1'] + "<p><IMG SRC=\"" + shadeimageurl + "\">")
+	description = description.replace('[[My Shade]]', listing['Variation1'] + "<p><IMG SRC=\"" + shadeimageurl + "\">")
 	
 
         # Insert listing into OB
         payload = {
-            'keywords': 'cosmetics',
+            'keywords': tags,
             'title': title + ' ' + listing['Variation1'], #I added Variation1 to the title because my listings are variation listings
             'description': description,
             'currency_code': 'USD',
